@@ -51,6 +51,7 @@ def jitter_raster(raster,  int scale):
 def integration(long[:,:] raster):
     """
     I(X) = sum(H(X_i)) - H(X)
+    Also known as the total correlation or multi-information.
     """
     cdef int N0 = raster.shape[0]
     cdef int N1 = raster.shape[1]
@@ -87,6 +88,11 @@ def integration(long[:,:] raster):
 @cython.initializedcheck(False)
 @cython.cdivision(True)
 def integration_local(long[:,:] raster):
+    """
+    For a multivariate time-series, calculates the instantanious integration at each time-point. 
+    
+    i(x_t) = sum(h(x_i)) - h(x_t)
+    """
 
     cdef double[:] p1s = np.divide(np.sum(raster, axis=1), raster.shape[1]).astype("double")
     cdef double[:] p0s = np.subtract(1, p1s).astype("double")
@@ -186,6 +192,11 @@ def O_information(long[:,:] raster):
         summation += channel_ent - joint_ent_reduced
     
     return ((n-2)*joint_ent)+summation
+
+def binding_entropy(long[:, :] raster):
+    
+    return -1*(O_information(raster) - integration(raster))
+
 """
 import pandas as pd 
 import numpy as np
